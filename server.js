@@ -1,9 +1,11 @@
 const express = require("express")
 const errorHandler = require("./middleware/errorHandler")
+const connectDb = require("./config/dbConnection")
 const dotenv = require("dotenv").config()
 
 const port = process.env.PORT ||  5000
 
+connectDb()
 const app = express()
 
 //internal middleware to handle json respone req.body
