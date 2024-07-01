@@ -12,6 +12,10 @@ const app = express()
 app.use(express.json())
 
 app.use("/api/users", require("./routes/userRoutes"))
+app.use('/api/communities', require("./routes/communityRoutes"));
+app.use('/api/events', require("./routes/eventRoutes"))
+app.use('/api/posts', require("./routes/postRoutes"))
+app.use('/api/comments', require("./routes/commentRoutes"));
 
 app.use(errorHandler)
 
