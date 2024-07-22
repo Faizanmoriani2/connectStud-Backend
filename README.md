@@ -3,3 +3,8 @@
 
  The Project is Ongoing ... 
  and build on tech Stack (Node/express, MongoDB)
+
+ in .env file: we have to create three variables:
+PORT=5000
+CONNECTION_STRING="mongodb+srv://admin:admin@faizancluster.ftags8a.mongodb.net/connectStud-backend?retryWrites=true&w=majority&appName=FaizanCluster/connectStud-backend"
+ACCESS_TOKEN_SECRET=faizan123
