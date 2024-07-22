@@ -37,7 +37,8 @@ const getEventById = async (req, res) => {
 // Create a new event
 const createEvent = async (req, res) => {
     try {
-        const { title, description, date, location, communityId, createdBy } = req.body;
+        const { title, description, date, location, communityId } = req.body;
+        const createdBy = req.user.id
 
         const newEvent = new Event({
             title,

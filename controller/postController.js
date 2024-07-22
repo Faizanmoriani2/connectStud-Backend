@@ -1,7 +1,8 @@
 const Post = require('../models/postModel'); 
 async function createPost(req, res) {
     try {
-        const { content, author, community, event } = req.body;
+        const { content, community, event } = req.body;
+        const author = req.user.id;
         const post = new Post({ content, author, community, event });
         const savedPost = await post.save();
         res.status(201).json(savedPost);

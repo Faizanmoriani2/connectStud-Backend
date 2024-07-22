@@ -4,7 +4,8 @@ const { validationResult } = require('express-validator');
 class CommentController {
     async createComment(req, res) {
         try {
-            const { content, author, post } = req.body;
+            const { content, post } = req.body;
+            const author = req.user.id
             const comment = new Comment({ content, author, post });
             const savedComment = await comment.save();
             res.status(201).json(savedComment);

@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const CommunityController = require('../controller/communityController');
+const authenticate = require('../middleware/authenticate');
 
 // Routes for community operations
-router.post('/create', CommunityController.createCommunity); // working
+router.post('/create', authenticate,CommunityController.createCommunity); // working
 router.get('/', CommunityController.getAllCommunities); // working
 router.get('/:id', CommunityController.getCommunityById); // working
 router.put('/:id', CommunityController.updateCommunity); // working

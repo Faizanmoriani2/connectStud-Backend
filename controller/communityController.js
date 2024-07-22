@@ -8,8 +8,8 @@ const CommunityController = {
   // Create a new community
   createCommunity: async (req, res) => {
     try {
-      const { name, description, createdBy } = req.body;
-
+      const { name, description } = req.body;
+      const createdBy = req.user.id;
       // Check if the community name already exists
       const existingCommunity = await Community.findOne({ name });
       if (existingCommunity) {
