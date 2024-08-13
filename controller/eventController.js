@@ -37,7 +37,8 @@ const getEventById = async (req, res) => {
 // Create a new event
 const createEvent = async (req, res) => {
     try {
-        const { title, description, date, location, communityId } = req.body;
+        console.log('Request Body:', req.body);
+        const { title, description, date, location, community } = req.body;
         const createdBy = req.user.id
 
         const newEvent = new Event({
@@ -46,7 +47,7 @@ const createEvent = async (req, res) => {
             date,
             location,
             createdBy,
-            community: communityId // Assuming the event is linked to a community
+            community // Assuming the event is linked to a community
         });
 
         await newEvent.save();

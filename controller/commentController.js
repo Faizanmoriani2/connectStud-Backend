@@ -6,10 +6,14 @@ class CommentController {
         try {
             const { content, post } = req.body;
             const author = req.user.id
+            if (!content || !post || !author) {
+                return res.status(400).json({ error: 'Content, post ID, and author are required' });
+            }
             const comment = new Comment({ content, author, post });
             const savedComment = await comment.save();
             res.status(201).json(savedComment);
         } catch (err) {
+            console.error("Error while creating the comment: ", err)
             res.status(500).json({ error: err.message });
         }
     }
@@ -62,6 +66,17 @@ class CommentController {
             res.status(500).json({ error: err.message });
         }
     }
+
+    async getCommentsByPostId(req, res) {
+        try {
+            const { postId } = req.params;
+            const comments = await Comment.find({ post: postId }).populate('author', 'username email');
+            res.json(comments);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
 }
 
 module.exports = new CommentController();

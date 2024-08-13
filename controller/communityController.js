@@ -1,6 +1,9 @@
 const Community = require('../models/communityModel'); 
 const User = require('../models/userModel'); 
 const mongoose = require('mongoose');
+const upload = require("../middleware/uploadMiddleware")
+const multer = require('multer');
+const path = require('path')
 
 // Controller to handle CRUD operations for the Community model
 const CommunityController = {
@@ -10,6 +13,15 @@ const CommunityController = {
     try {
       const { name, description } = req.body;
       const createdBy = req.user.id;
+      let coverImage = '';
+
+    if (req.file) {
+      coverImage = `/${req.file.path}`;  // Prepend '/' to ensure correct path
+    } else {
+      coverImage = '/uploads/default-image.jpg'; // Use a default image if none is uploaded
+    }
+      // const coverImage = '/'+ req.file ? req.file.path : '/uploads/default.jpg'
+      
       // Check if the community name already exists
       const existingCommunity = await Community.findOne({ name });
       if (existingCommunity) {
@@ -20,11 +32,12 @@ const CommunityController = {
       const newCommunity = new Community({
         name,
         description,
-        createdBy
+        createdBy,
+        coverImage
       });
-
+      console.log(req.file)
       await newCommunity.save();
-
+      
       res.status(201).json({ message: 'Community created successfully.', community: newCommunity });
     } catch (error) {
       res.status(500).json({ message: 'Error creating community', error });
@@ -34,7 +47,7 @@ const CommunityController = {
   // Get all communities
   getAllCommunities: async (req, res) => {
     try {
-      const communities = await Community.find()
+      const communities = await Community.find().populate('createdBy', 'username')
       res.status(200).json(communities);
     } catch (error) {
       res.status(500).json({ message: 'Error fetching communities', error });
@@ -70,19 +83,30 @@ const CommunityController = {
     try {
       const { id } = req.params;
       const { name, description } = req.body;
-
+  
       // Validate if ID is a proper ObjectId
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid community ID.' });
       }
-
-      // Find and update the community
-      const updatedCommunity = await Community.findByIdAndUpdate(id, { name, description }, { new: true });
-
-      if (!updatedCommunity) {
+  
+      // Find the community by ID
+      const community = await Community.findById(id);
+  
+      // Check if community exists
+      if (!community) {
         return res.status(404).json({ message: 'Community not found.' });
       }
-
+  
+      // Check if the current user is the creator of the community
+      if (community.createdBy.toString() !== req.user.id) {
+        return res.status(403).json({ message: 'You do not have permission to edit this community' });
+      }
+  
+      // Update the community
+      community.name = name || community.name;
+      community.description = description || community.description;
+      const updatedCommunity = await community.save();
+  
       res.status(200).json({ message: 'Community updated successfully.', community: updatedCommunity });
     } catch (error) {
       res.status(500).json({ message: 'Error updating community', error });
