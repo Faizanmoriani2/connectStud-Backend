@@ -16,6 +16,10 @@ const CommunitySchema = new mongoose.Schema({
     ref: 'User', // Assuming there is a User model
     required: true
   },
+  coverImage: {
+    type: String,
+    default: "/uploads/default.jpg"
+  },
   members: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

@@ -18,4 +18,8 @@ router.put('/:id', authenticate, CommentController.updateComment); // working
 // Delete a comment by ID
 router.delete('/:id', CommentController.deleteComment); // working
 
+// Get comment by post id
+router.get('/post/:postId', authenticate, CommentController.getCommentsByPostId);
+
+
 module.exports = router;
