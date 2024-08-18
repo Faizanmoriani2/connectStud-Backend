@@ -19,6 +19,8 @@ app.use('/api/communities', require("./routes/communityRoutes"));
 app.use('/api/events', require("./routes/eventRoutes"))
 app.use('/api/posts', require("./routes/postRoutes"))
 app.use('/api/comments', require("./routes/commentRoutes"));
+app.use('/api/connections', require("./routes/connectionRoutes"))
+app.use('/api/messages', require("./routes/messageRoutes"));
 
 app.use(errorHandler)
 
