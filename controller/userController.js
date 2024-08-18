@@ -83,4 +83,39 @@ const currentUser = (req, res) =>{
     res.json(req.user)
 }
 
-module.exports = {registerUser, loginUser, currentUser}
+
+const updateUserProfile = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const { bio } = req.body;
+    const profilePicture = req.file ? `/uploads/${req.file.filename}` : '/uploads/default-avatar.png';
+
+    try {
+        const updatedData = {};
+        if (bio) updatedData.bio = bio;
+        if (profilePicture) updatedData.profilePicture = profilePicture;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: updatedData },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({
+            id: updatedUser._id,
+            username: updatedUser.username,
+            email: updatedUser.email,
+            bio: updatedUser.bio,
+            profilePicture: updatedUser.profilePicture,
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+
+
+module.exports = {registerUser, loginUser, currentUser, updateUserProfile}
