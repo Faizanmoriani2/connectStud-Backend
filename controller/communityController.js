@@ -79,39 +79,51 @@ const CommunityController = {
   },
 
   // Update a community by ID
-  updateCommunity: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { name, description } = req.body;
-  
-      // Validate if ID is a proper ObjectId
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid community ID.' });
-      }
-  
-      // Find the community by ID
-      const community = await Community.findById(id);
-  
-      // Check if community exists
-      if (!community) {
-        return res.status(404).json({ message: 'Community not found.' });
-      }
-  
-      // Check if the current user is the creator of the community
-      if (community.createdBy.toString() !== req.user.id) {
-        return res.status(403).json({ message: 'You do not have permission to edit this community' });
-      }
-  
-      // Update the community
-      community.name = name || community.name;
-      community.description = description || community.description;
-      const updatedCommunity = await community.save();
-  
-      res.status(200).json({ message: 'Community updated successfully.', community: updatedCommunity });
-    } catch (error) {
-      res.status(500).json({ message: 'Error updating community', error });
+ // Update a community by ID
+updateCommunity: async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description } = req.body;
+    let coverImage;
+
+    // Validate if ID is a proper ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid community ID.' });
     }
-  },
+
+    // Find the community by ID
+    const community = await Community.findById(id);
+
+    // Check if community exists
+    if (!community) {
+      return res.status(404).json({ message: 'Community not found.' });
+    }
+
+    // Check if the current user is the creator of the community
+    if (community.createdBy.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You do not have permission to edit this community' });
+    }
+
+    // Handle the cover image update
+    if (req.file) {
+      coverImage = `/${req.file.path}`;
+    }
+
+    // Update only the provided fields
+    if (name) community.name = name;
+    if (description) community.description = description;
+    if (coverImage) community.coverImage = coverImage;
+
+    const updatedCommunity = await community.save();
+
+    res.status(200).json({ message: 'Community updated successfully.', community: updatedCommunity });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating community', error });
+  }
+}
+
+  
+,
 
   // Delete a community by ID
   deleteCommunity: async (req, res) => {
