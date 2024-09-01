@@ -8,7 +8,7 @@ const upload = require('../middleware/uploadMiddleware');
 router.post('/create', authenticate, upload.single('coverImage'),CommunityController.createCommunity); // working
 router.get('/', CommunityController.getAllCommunities); // working
 router.get('/:id', authenticate,CommunityController.getCommunityById); // working
-router.put('/:id', authenticate,CommunityController.updateCommunity); // working
+router.put('/:id', authenticate,upload.single('coverImage'),CommunityController.updateCommunity); // working
 router.delete('/:id', CommunityController.deleteCommunity); // working
 router.post('/addMember', CommunityController.addMember); // working
 router.post('/removeMember', CommunityController.removeMember); // working

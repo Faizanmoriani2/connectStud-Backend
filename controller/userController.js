@@ -7,40 +7,43 @@ const jwt=require("jsonwebtoken")
 // @route POST /api/users/register
 // @access PUBLIC
 const registerUser = asyncHandler(async(req, res) => {
-    const {username, email, password} = req.body
+    const { username, email, password } = req.body;
 
-    if(!username || !email || !password){
-        res.status(400)
-        throw new Error("All fields are mandatory!")
-    }
-    const userAvailable = await User.findOne({email})
-    if(userAvailable){
-        res.status(400)
-        throw new Error ("User already registered") 
+    if (!username || !email || !password) {
+        res.status(400);
+        throw new Error("All fields are mandatory!");
     }
 
-    //Hash Password
-    const hashedPassword = await bcrypt.hash(password, 10)
-    console.log("hashed Password: ", hashedPassword)
+    const userAvailable = await User.findOne({ email });
+    if (userAvailable) {
+        res.status(400);
+        throw new Error("User already registered");
+    }
+
+    // Hash Password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Set the default profile picture path
+    const defaultProfilePicture = "/uploads/default-avatar.png";
+
     const user = await User.create({
         username,
         email,
         password: hashedPassword,
-    })
+        profilePicture: defaultProfilePicture,
+    });
 
-    console.log("User Created ", user)
-
-    if(user){
-        res.status(201).json({_id: user.id, email: user.email})
-    }else{
-        res.status(400)
-        throw new Error ("User data not valid")
+    if (user) {
+        res.status(201).json({ 
+            _id: user.id, 
+            email: user.email,
+            profilePicture: user.profilePicture
+        });
+    } else {
+        res.status(400);
+        throw new Error("User data not valid");
     }
-
-    res.json({
-        message: "register User"
-    })
-})
+});
 
 // @desc Login User
 // @route POST /api/users/login 
@@ -62,7 +65,7 @@ const loginUser = asyncHandler(async(req, res) =>{
             },
 
         }, process.env.ACCESS_TOKEN_SECRET, 
-        {expiresIn: "15m"}    
+        {expiresIn: "240m"}    
     )
         res.status(200).json({accessToken,  user: {
             id: user.id,
@@ -85,34 +88,33 @@ const currentUser = (req, res) =>{
 
 
 const updateUserProfile = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
-    const { bio } = req.body;
-    const profilePicture = req.file ? `/uploads/${req.file.filename}` : '/uploads/default-avatar.png';
-
     try {
-        const updatedData = {};
-        if (bio) updatedData.bio = bio;
-        if (profilePicture) updatedData.profilePicture = profilePicture;
+        const userId = req.user.id;
+        const { bio } = req.body;
+        const profilePicture = req.file ? `/uploads/${req.file.filename}` : null; // Only update if new file uploaded
 
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            { $set: updatedData },
-            { new: true }
-        );
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: "User not found" });
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
         }
 
+        // Update bio if provided
+        if (bio) user.bio = bio;
+
+        // Update profile picture if a new one is uploaded
+        if (profilePicture) user.profilePicture = profilePicture;
+
+        await user.save();
+
         res.json({
-            id: updatedUser._id,
-            username: updatedUser.username,
-            email: updatedUser.email,
-            bio: updatedUser.bio,
-            profilePicture: updatedUser.profilePicture,
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            bio: user.bio,
+            profilePicture: user.profilePicture,
         });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ error: err.message });
     }
 });
 
